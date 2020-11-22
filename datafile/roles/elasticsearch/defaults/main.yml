@@ -1,0 +1,13 @@
+---
+# defaults file for elasticsearch
+
+cluster_name: elk-cluster
+node_name: ${HOSTNAME}
+node_master: true
+node_data: true
+path_data: /var/lib/elasticsearch
+path_logs: /var/log/elasticsearch
+network_host: "{{ ansible_all_ipv4_addresses }}"
+http_port: 9200
+discovery_seed_hosts: ["192.168.0.30", "192.168.0.31", "192.168.0.32"]
+

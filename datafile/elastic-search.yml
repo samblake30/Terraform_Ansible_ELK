@@ -1,0 +1,40 @@
+--- #This playbook file is for installtion of elasticsearch on master and data nodes
+- hosts: "{{ passed_in_hosts }}"
+  roles:
+    - role: elasticsearch
+  become: yes
+  remote_user: ec2-user
+  become_user: root
+  gather_facts: yes
+  tasks:        
+  - name: Print all available facts
+    ansible.builtin.debug:
+      var: ansible_facts        
+  - name: Creating new file for elasticsearch download
+    copy:
+      src: /home/ec2-user/deploy_iac_ansible/elastic_stack.repo
+      dest: /etc/yum.repos.d/elastic_stack.repo
+      owner: root
+      group: root
+      mode: '0644'
+  - name: Changing the Hostname
+    shell: "hostnamectl set-hostname {{ passed_in_hosts }}"
+  - name: Download the java and elasticsearch repo/packages
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - java-1.8.0-openjdk
+      - elasticsearch
+  - name: Replace the default elasticsearch.yml
+    template:
+      src: roles/elasticsearch/templates/elasticsearch.yml
+      dest: /etc/elasticsearch/elasticsearch.yml     
+  - name: Now to reload daemon for the changes in configuration
+    command: systemctl daemon-reload
+  - name: Enable , start and check status or elasticsearch
+    shell: "systemctl {{ item }} elasticsearch"
+    with_items:
+      - enable
+      - start
+
